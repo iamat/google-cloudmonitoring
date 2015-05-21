@@ -1,0 +1,31 @@
+{
+  "name": "google-cloudmonitoring",
+  "version": "0.0.1",
+  "description": "Simple interface for Google Cloud Monitoring",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://git@github.com/iamat/google-cloudmonitoring"
+  },
+  "keywords": [
+    "google",
+    "gce",
+    "cloudmonitoring"
+  ],
+  "author": {
+      "name": "Lars Jacob",
+      "email": "jacob.lars@gmail.com",
+      "url": "https://twitter.com/jaclar"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iamat/google-cloudmonitoring/issues"
+  },
+  "homepage": "https://github.com/iamat/google-cloudmonitoring",
+  "dependencies": {
+    "googleapis": "^2.0.4"
+  }
+}
