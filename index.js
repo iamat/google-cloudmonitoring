@@ -69,7 +69,6 @@ GLM.prototype._transformLables = function (labels) {
         l = {};
 
     Object.keys(labels).map(function (label) {
-        console.log(label);
         if (label.search(/\./) !== -1) { // use user defined prefix
             l[label] = labels[label];
         } else { // use common prefexi
