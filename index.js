@@ -24,7 +24,7 @@ GLM.prototype.setValue = function (name, value, labels) {
                 "timeseriesDesc": {
                     "project": self.project,
                     "metric": self.prefix + name,
-                    "labels": {}
+                    "labels": self._transformLables(labels)
                 },
                 "point": {
                     "start": (new Date()).toISOString(),
@@ -35,16 +35,48 @@ GLM.prototype.setValue = function (name, value, labels) {
         ]
     };
 
-    Object.keys(labels).forEach(function (label) {
-        point
-            .timeseries[0]
-            .timeseriesDesc
-            .labels[self.prefix + label] = labels[label];
-    });
+    cloudmonitoring.timeseries.write({ auth: self._jwtClient,
+                                       project: self.project,
+                                       resource: point});
+};
+
+GLM.prototype.setValues = function (values) {
+    var self = this;
+    var point = {
+        "timeseries": values.map(function (v) {
+            return {
+                "timeseriesDesc": {
+                    "project": self.project,
+                    "metric": self.prefix + v.name,
+                    "labels": self._transformLables(v.labels)
+                },
+                "point": {
+                    "start": (new Date()).toISOString(),
+                    "end": (new Date()).toISOString(),
+                    "int64Value": v.value
+                }
+            };
+        })
+    };
 
     cloudmonitoring.timeseries.write({ auth: self._jwtClient,
                                        project: self.project,
                                        resource: point});
+};
+
+GLM.prototype._transformLables = function (labels) {
+    var self = this,
+        l = {};
+
+    Object.keys(labels).map(function (label) {
+        console.log(label);
+        if (label.search(/\./) !== -1) { // use user defined prefix
+            l[label] = labels[label];
+        } else { // use common prefexi
+            l[self.prefix + label] = labels[label];
+        }
+    });
+    return l;
 };
 
 module.exports = GLM;
