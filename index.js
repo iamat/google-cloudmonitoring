@@ -1,6 +1,9 @@
 var google = require('googleapis'),
     cloudmonitoring = google.cloudmonitoring("v2beta2");
 
+var EventEmitter = require('events').EventEmitter,
+    util = require("util");
+
 var GLM = function (options) {
     options = options || {};
 
@@ -15,6 +18,8 @@ var GLM = function (options) {
                                           "https://www.googleapis.com/auth/monitoring");
     this._jwtClient.fromJSON(this._authJSON);
 };
+
+util.inherits(GLM, EventEmitter);
 
 GLM.prototype.setValue = function (name, value, labels) {
     var self = this;
@@ -35,9 +40,15 @@ GLM.prototype.setValue = function (name, value, labels) {
         ]
     };
 
-    cloudmonitoring.timeseries.write({ auth: self._jwtClient,
-                                       project: self.project,
-                                       resource: point});
+    var params = { auth: self._jwtClient,
+                   project: self.project,
+                   resource: point};
+    cloudmonitoring.timeseries.write(params, function (err) {
+        if (err) {
+            err.values = params.values;
+            self.emit("error", err);
+        }
+    });
 };
 
 GLM.prototype.setValues = function (values) {
@@ -59,9 +70,16 @@ GLM.prototype.setValues = function (values) {
         })
     };
 
-    cloudmonitoring.timeseries.write({ auth: self._jwtClient,
-                                       project: self.project,
-                                       resource: point});
+    var params = { auth: self._jwtClient,
+                   project: self.project,
+                   resource: point};
+
+    cloudmonitoring.timeseries.write(params, function (err) {
+        if (err) {
+            err.values = params.values;
+            self.emit("error", err);
+        }
+    });
 };
 
 GLM.prototype._transformLables = function (labels) {

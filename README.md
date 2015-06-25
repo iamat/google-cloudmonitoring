@@ -25,6 +25,10 @@ var glm = new GLM({ project: "your-project-id",
 
 var value = 42;
 
+glm.on("error", function (err) {
+  console.log("Something bad happened:", err.message);
+})
+
 glm.setValue("/your/metric/name", value, { "/your/label": "glm" });
 
 ```
