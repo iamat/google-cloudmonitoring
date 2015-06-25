@@ -45,7 +45,7 @@ GLM.prototype.setValue = function (name, value, labels) {
                    resource: point};
     cloudmonitoring.timeseries.write(params, function (err) {
         if (err) {
-            err.values = params.values;
+            err.value = value;
             self.emit("error", err);
         }
     });
@@ -76,7 +76,7 @@ GLM.prototype.setValues = function (values) {
 
     cloudmonitoring.timeseries.write(params, function (err) {
         if (err) {
-            err.values = params.values;
+            err.values = values;
             self.emit("error", err);
         }
     });
