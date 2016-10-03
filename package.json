@@ -1,6 +1,6 @@
 {
   "name": "google-cloudmonitoring",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Simple interface for Google Cloud Monitoring",
   "main": "index.js",
   "scripts": {
