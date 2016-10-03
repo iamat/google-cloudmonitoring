@@ -1,99 +1,94 @@
-var google = require('googleapis'),
-    cloudmonitoring = google.cloudmonitoring("v2beta2");
+const google = require('googleapis');
+const monitoring = google.monitoring('v3');
 
-var EventEmitter = require('events').EventEmitter,
-    util = require("util");
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
 
 var GLM = function (options) {
-    options = options || {};
+  options = options || {};
 
-    this.project = options.project;
-    this.prefix = options.prefix || "custom.cloudmonitoring.googleapis.com";
+  this.project = options.project;
+  this.prefix = options.prefix ||
+        `projects/${this.project}/metricDescriptors/custom.googleapis.com/`;
+  this._name = `projects/${this.project}`;
+  this._resource = options.resource;
 
-    this._authJSON = options.authJSON,
+  this._authJSON = options.authJSON;
 
-    this._jwtClient = new google.auth.JWT(null,
-                                          null,
-                                          null,
-                                          "https://www.googleapis.com/auth/monitoring");
-    this._jwtClient.fromJSON(this._authJSON);
+  this._jwtClient = new google.auth.JWT(null,
+                                        null,
+                                        null,
+                                        'https://www.googleapis.com/auth/monitoring');
+
+  this._jwtClient.fromJSON(this._authJSON);
 };
 
 util.inherits(GLM, EventEmitter);
 
-GLM.prototype.setValue = function (name, value, labels) {
-    var self = this;
-    var point = {
-        "timeseries": [
-            {
-                "timeseriesDesc": {
-                    "project": self.project,
-                    "metric": self.prefix + name,
-                    "labels": self._transformLables(labels)
-                },
-                "point": {
-                    "start": (new Date()).toISOString(),
-                    "end": (new Date()).toISOString(),
-                    "int64Value": value
-                }
-            }
-        ]
-    };
+GLM.prototype.setValue = function (name /* instance/iamat/test_v3 */, value, labels) {
+  const metric = { type: 'custom.googleapis.com/' + name,
+                   labels };
+  const point = { timeSeries: [
+    { metric,
+      resource: this._resource,
+      points: [
+        { interval: {
+          endTime: (new Date()).toISOString()
+        },
+          value: {
+            int64Value: String(value)
+          }
+        }]
+    }]};
 
-    var params = { auth: self._jwtClient,
-                   project: self.project,
+  var params = { auth: this._jwtClient,
+                   name: this._name,
                    resource: point};
-    cloudmonitoring.timeseries.write(params, function (err) {
-        if (err) {
-            err.value = value;
-            self.emit("error", err);
-        }
-    });
+  monitoring.projects.timeSeries.create(params, (err) => {
+    if (err) {
+      err.resource = JSON.stringify(point);
+      this.emit('error', err);
+    }
+  });
 };
 
 GLM.prototype.setValues = function (values) {
-    var self = this;
-    var point = {
-        "timeseries": values.map(function (v) {
-            return {
-                "timeseriesDesc": {
-                    "project": self.project,
-                    "metric": self.prefix + v.name,
-                    "labels": self._transformLables(v.labels)
-                },
-                "point": {
-                    "start": (new Date()).toISOString(),
-                    "end": (new Date()).toISOString(),
-                    "int64Value": v.value
-                }
-            };
-        })
-    };
+  const point = {
+    timeSeries: values.map(
+      (v) => ({ metric: { type: `custom.googleapis.com/${v.name}`,
+                          labels: v.labels },
+                resource: this._resource,
+                'points': [{
+                  interval: {
+                    'endTime': (new Date()).toISOString()
+                  },
+                  value: {
+                    'int64Value': String(v.value)
+                  }
+                }]
+              })
+    )
+  };
+  const params = { auth: this._jwtClient,
+                   name: this._name,
+                   resource: point };
 
-    var params = { auth: self._jwtClient,
-                   project: self.project,
-                   resource: point};
-
-    cloudmonitoring.timeseries.write(params, function (err) {
-        if (err) {
-            err.values = values;
-            self.emit("error", err);
-        }
-    });
+  monitoring.projects.timeSeries.create(params, (err) => {
+    if (err) {
+      err.values = values;
+      this.emit('error', err);
+    }
+  });
 };
 
-GLM.prototype._transformLables = function (labels) {
-    var self = this,
-        l = {};
+GLM.prototype.createMetric = function (name, metricDescriptor, callback) {
+  const params = {
+    auth: this._jwtClient,
+    name,
+    resource: metricDescriptor
+  };
 
-    Object.keys(labels).map(function (label) {
-        if (label.search(/\./) !== -1) { // use user defined prefix
-            l[label] = labels[label];
-        } else { // use common prefexi
-            l[self.prefix + label] = labels[label];
-        }
-    });
-    return l;
+  monitoring.projects.metricDescriptors.create(params, callback);
 };
 
 module.exports = GLM;
