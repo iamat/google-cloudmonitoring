@@ -31,6 +31,6 @@
     "googleapis": "^13.0.0"
   },
   "devDependencies": {
-    "semistandard": "^9.0.0"
+    "semistandard": "^9.1.0"
   }
 }
