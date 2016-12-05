@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/iamat/google-cloudmonitoring",
   "dependencies": {
-    "googleapis": "^13.0.0"
+    "googleapis": "^15.0.0"
   },
   "devDependencies": {
     "semistandard": "^9.0.0"
