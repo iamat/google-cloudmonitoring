@@ -13,14 +13,19 @@ var GLM = function (options) {
   this._name = `projects/${this.project}`;
   this._resource = options.resource;
 
-  this._authJSON = options.authJSON;
+  google.auth.getApplicationDefault((err, authClient, projectId) => {
+    if (err) {
+      throw err;
+    }
 
-  this._jwtClient = new google.auth.JWT(null,
-                                        null,
-                                        null,
-                                        'https://www.googleapis.com/auth/monitoring');
+    if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+      authClient = authClient.createScoped([
+        'https://www.googleapis.com/auth/monitoring'
+      ]);
+    }
 
-  this._jwtClient.fromJSON(this._authJSON);
+    this._authClient = authClient;
+  });
 };
 
 util.inherits(GLM, EventEmitter);
@@ -43,7 +48,7 @@ GLM.prototype.setValue = function (name /* instance/iamat/test_v3 */, value, lab
     }]};
 
   var params = {
-    auth: this._jwtClient,
+    auth: this._authClient,
     name: this._name,
     resource: point };
 
@@ -76,7 +81,7 @@ GLM.prototype.setValues = function (values) {
   };
 
   const params = {
-    auth: this._jwtClient,
+    auth: this._authClient,
     name: this._name,
     resource: point };
 
@@ -90,7 +95,7 @@ GLM.prototype.setValues = function (values) {
 
 GLM.prototype.createMetric = function (name, metricDescriptor, callback) {
   const params = {
-    auth: this._jwtClient,
+    auth: this._authClient,
     name,
     resource: metricDescriptor
   };

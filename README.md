@@ -11,9 +11,10 @@ npm install google-cloudmonitoring
 ## Usage
 
 1. Enable *Google Cloud Monitoring API* in your Google Developer Console.
-2. Create a new Client ID for a Service Account (JSON Key) and download it.
-3. Create a [Custom Metric](https://cloud.google.com/monitoring/custom-metrics/)
-4. Include it into you app!
+2. The library will autodetect an existing [GCloud](https://cloud.google.com/sdk/downloads)
+   installation or tries to pull the service account from the
+   [GCE instance metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata).
+3. Include it into your app!
 
 ## Example
 
@@ -25,7 +26,6 @@ const resource = { 'type': 'gce_instance',
                                'zone': 'us-central1-a' }};
 
 const glm = new GLM({ project: "your-project-id",
-                      authJSON: require("./your-JSON-key.json"),
                       resource });
 
 const value = 42;
