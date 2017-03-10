@@ -9,38 +9,19 @@ var GLM = function (options) {
 
   this.project = options.project;
   this.prefix = options.prefix || 'custom.cloudmonitoring.googleapis.com';
-  this._initalized = false;
 
-  google.auth.getApplicationDefault((err, authClient, projectId) => {
-    if (err) {
-      this.emit('error', err);
-      return;
-    }
+  this._authJSON = options.authJSON;
 
-    if (authClient.createScopedRequired && authClient.createScopedRequired()) {
-      authClient = authClient.createScoped([
-        'https://www.googleapis.com/auth/monitoring'
-      ]);
-    }
-
-    if (!this.project) {
-      // autodetect projectId if not set by user
-      this.project = projectId;
-    }
-
-    this._authClient = authClient;
-    this._initalized = true;
-  });
+  this._jwtClient = new google.auth.JWT(null,
+                                        null,
+                                        null,
+                                        'https://www.googleapis.com/auth/monitoring');
+  this._jwtClient.fromJSON(this._authJSON);
 };
 
 util.inherits(GLM, EventEmitter);
 
 GLM.prototype.setValue = function (name, value, labels) {
-  if (!this._initalized) {
-    // don't do anything if we didn't get authenticated yet
-    return;
-  }
-
   var self = this;
   var point = {
     'timeseries': [
@@ -59,7 +40,7 @@ GLM.prototype.setValue = function (name, value, labels) {
     ]
   };
 
-  var params = { auth: self._authClient,
+  var params = { auth: self._jwtClient,
     project: self.project,
     resource: point };
 
@@ -72,11 +53,6 @@ GLM.prototype.setValue = function (name, value, labels) {
 };
 
 GLM.prototype.setValues = function (values) {
-  if (!this._initalized) {
-    // don't do anything if we didn't get authenticated yet
-    return;
-  }
-
   var self = this;
   var point = {
     'timeseries': values.map(function (v) {
@@ -95,7 +71,7 @@ GLM.prototype.setValues = function (values) {
     })
   };
 
-  var params = { auth: self._authClient,
+  var params = { auth: self._jwtClient,
     project: self.project,
     resource: point};
 
