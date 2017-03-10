@@ -19,7 +19,7 @@ npm install google-cloudmonitoring
 ## Example
 
 ```javascript
-const GLM = require("google-cloudmonitoring");
+const GLM = require('google-cloudmonitoring')('v3');
 
 const resource = { 'type': 'gce_instance',
                    'labels': { 'instance_id': 'your-instance-id',
@@ -29,10 +29,10 @@ const glm = new GLM({ resource });
 
 const value = 42;
 
-glm.on("error", function (err) {
-  console.log("Something bad happened:", err.message);
+glm.on('error', function (err) {
+  console.log('Something bad happened:', err.message);
 })
 
-glm.setValue("/your/metric/name", value, { "/your/label": "glm" });
+glm.setValue('/your/metric/name', value, { '/your/label': 'glm' });
 
 ```
