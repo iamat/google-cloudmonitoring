@@ -21,6 +21,8 @@ npm install google-cloudmonitoring
 ```javascript
 const GLM = require('google-cloudmonitoring')('v3');
 
+// resource is optional, if not GLM will try to detect the
+// resource information using GCE instance metadata
 const resource = { 'type': 'gce_instance',
                    'labels': { 'instance_id': 'your-instance-id',
                                'zone': 'us-central1-a' }};

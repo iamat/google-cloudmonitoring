@@ -1,3 +1,4 @@
+const metadata = require('google-compute-metadata');
 const google = require('googleapis');
 const monitoring = google.monitoring('v3');
 
@@ -11,29 +12,49 @@ var GLM = function (options) {
   this._resource = options.resource;
   this._initalized = false;
 
-  google.auth.getApplicationDefault((err, authClient, projectId) => {
-    if (err) {
+  metadata.instance((err, data) => {
+    if (err && !this._resource) {
+      // only raise error if user didn't provide resource data
       this.emit('error', err);
       return;
     }
 
-    if (authClient.createScopedRequired && authClient.createScopedRequired()) {
-      authClient = authClient.createScoped([
-        'https://www.googleapis.com/auth/monitoring'
-      ]);
+    if (!this._resource) {
+      const zoneSplit = data.zone.split('/');
+      const zone = zoneSplit[zoneSplit.length - 1];
+      this._resource = {
+        type: 'gce_instance',
+        labels: {
+          instance_id: data.hostname.split('.')[0],
+          zone
+        }
+      };
     }
 
-    if (!this.project) {
-      // autodetect projectId if not set by user
-      this.project = projectId;
-    }
+    google.auth.getApplicationDefault((err, authClient, projectId) => {
+      if (err) {
+        this.emit('error', err);
+        return;
+      }
 
-    this.prefix = options.prefix ||
-      `projects/${this.project}/metricDescriptors/custom.googleapis.com/`;
-    this._name = `projects/${this.project}`;
+      if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+        authClient = authClient.createScoped([
+          'https://www.googleapis.com/auth/monitoring'
+        ]);
+      }
 
-    this._authClient = authClient;
-    this._initalized = true;
+      if (!this.project) {
+        // autodetect projectId if not set by user
+        this.project = projectId;
+      }
+
+      this.prefix = options.prefix ||
+        `projects/${this.project}/metricDescriptors/custom.googleapis.com/`;
+      this._name = `projects/${this.project}`;
+
+      this._authClient = authClient;
+      this._initalized = true;
+    });
   });
 };
 
