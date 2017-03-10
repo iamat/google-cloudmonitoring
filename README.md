@@ -25,8 +25,7 @@ const resource = { 'type': 'gce_instance',
                    'labels': { 'instance_id': 'your-instance-id',
                                'zone': 'us-central1-a' }};
 
-const glm = new GLM({ project: "your-project-id",
-                      resource });
+const glm = new GLM({ resource });
 
 const value = 42;
 

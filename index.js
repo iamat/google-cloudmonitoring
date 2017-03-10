@@ -8,14 +8,13 @@ var GLM = function (options) {
   options = options || {};
 
   this.project = options.project;
-  this.prefix = options.prefix ||
-        `projects/${this.project}/metricDescriptors/custom.googleapis.com/`;
-  this._name = `projects/${this.project}`;
   this._resource = options.resource;
+  this._initalized = false;
 
   google.auth.getApplicationDefault((err, authClient, projectId) => {
     if (err) {
-      throw err;
+      this.emit('error', err);
+      return;
     }
 
     if (authClient.createScopedRequired && authClient.createScopedRequired()) {
@@ -24,13 +23,28 @@ var GLM = function (options) {
       ]);
     }
 
+    if (!this.project) {
+      // autodetect projectId if not set by user
+      this.project = projectId;
+    }
+
+    this.prefix = options.prefix ||
+      `projects/${this.project}/metricDescriptors/custom.googleapis.com/`;
+    this._name = `projects/${this.project}`;
+
     this._authClient = authClient;
+    this._initalized = true;
   });
 };
 
 util.inherits(GLM, EventEmitter);
 
-GLM.prototype.setValue = function (name /* instance/iamat/test_v3 */, value, labels) {
+GLM.prototype.setValue = function (name, value, labels) {
+  if (!this._initalized) {
+    // don't do anything if we didn't get authenticated yet
+    return;
+  }
+
   const metric = {
     type: 'custom.googleapis.com/' + name,
     labels };
@@ -61,6 +75,11 @@ GLM.prototype.setValue = function (name /* instance/iamat/test_v3 */, value, lab
 };
 
 GLM.prototype.setValues = function (values) {
+  if (!this._initalized) {
+    // don't do anything if we didn't get authenticated yet
+    return;
+  }
+
   const point = {
     timeSeries: values.map(
       (v) => ({
