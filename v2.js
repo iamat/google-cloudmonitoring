@@ -28,8 +28,6 @@ var GLM = function (options) {
       this.project = projectId;
     }
 
-    console.log('>>>', projectId, this.project)
-
     this._authClient = authClient;
     this._initalized = true;
   });
@@ -65,7 +63,6 @@ GLM.prototype.setValue = function (name, value, labels) {
     project: self.project,
     resource: point };
 
-  console.dir(params);
   cloudmonitoring.timeseries.write(params, function (err) {
     if (err) {
       err.value = value;
@@ -102,7 +99,6 @@ GLM.prototype.setValues = function (values) {
     project: self.project,
     resource: point};
 
-  console.dir(params);
   cloudmonitoring.timeseries.write(params, function (err) {
     if (err) {
       err.values = values;
