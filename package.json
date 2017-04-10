@@ -29,7 +29,7 @@
   "homepage": "https://github.com/iamat/google-cloudmonitoring",
   "dependencies": {
     "google-compute-metadata": "^1.2.1",
-    "googleapis": "^17.1.0"
+    "googleapis": "^19.0.0"
   },
   "devDependencies": {
     "semistandard": "^10.0.0"
