@@ -24,7 +24,7 @@ var GLM = function (options) {
       const zone = zoneSplit[zoneSplit.length - 1];
       this._resource = {
         type: 'gce_instance',
-        displayNmae: data.hostname.split('.')[0],
+        displayName: data.hostname.split('.')[0],
         labels: {
           name: data.hostname.split('.')[0],
           instance_id: data.id,
