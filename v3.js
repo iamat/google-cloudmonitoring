@@ -32,31 +32,31 @@ var GLM = function (options) {
         }
       };
     }
+  });
 
-    google.auth.getApplicationDefault((err, authClient, projectId) => {
-      if (err) {
-        this.emit('error', err);
-        return;
-      }
+  google.auth.getApplicationDefault((err, authClient, projectId) => {
+    if (err) {
+      this.emit('error', err);
+      return;
+    }
 
-      if (authClient.createScopedRequired && authClient.createScopedRequired()) {
-        authClient = authClient.createScoped([
-          'https://www.googleapis.com/auth/monitoring'
-        ]);
-      }
+    if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+      authClient = authClient.createScoped([
+        'https://www.googleapis.com/auth/monitoring'
+      ]);
+    }
 
-      if (!this.project) {
-        // autodetect projectId if not set by user
-        this.project = projectId;
-      }
+    if (!this.project) {
+      // autodetect projectId if not set by user
+      this.project = projectId;
+    }
 
-      this.prefix = options.prefix ||
-        `projects/${this.project}/metricDescriptors/custom.googleapis.com/`;
-      this._name = `projects/${this.project}`;
+    this.prefix = options.prefix ||
+      `projects/${this.project}/metricDescriptors/custom.googleapis.com/`;
+    this._name = `projects/${this.project}`;
 
-      this._authClient = authClient;
-      this._initalized = true;
-    });
+    this._authClient = authClient;
+    this._initalized = true;
   });
 };
 
